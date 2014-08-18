@@ -630,7 +630,7 @@
 - (IBAction)showInformation:(id)sender
 {
     static const char *tag2text[] = {
-        info_license_text, info_warranty_text, info_contrib_text
+        info_license_text, info_warranty_text, "dummy",
     };
     const char *info = tag2text[[sender tag]];
 
