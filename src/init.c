@@ -51,6 +51,7 @@
 #include "monitor.h"
 #ifdef HAVE_NETWORK
 #include "monitor_network.h"
+#include "prodbg_plugin.h"
 #endif
 #include "network.h"
 #include "palette.h"
@@ -151,6 +152,10 @@ int init_resources(void)
         init_resource_fail("monitor");
         return -1;
     }
+    if (prodbg_plugin_init() < 0) {
+        init_resource_fail("prodbg_plugin_init");
+        return -1;
+	}
 #endif
     return 0;
 }

@@ -1449,3 +1449,13 @@ void mon_disassemble_lines(MON_ADDR start_addr, MON_ADDR end_addr)
         }
     }
 }
+
+const char* mon_dis(MEMSPACE mem, WORD loc, unsigned int *size)
+{
+    const BYTE op = mon_get_mem_val(mem, loc);
+    const BYTE p1 = mon_get_mem_val(mem, loc + 1);
+    const BYTE p2 = mon_get_mem_val(mem, loc + 2);
+
+    return mon_disassemble_to_string_ex(mem, loc, loc, op, p1, p2, 1, size);
+}
+

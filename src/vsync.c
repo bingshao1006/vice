@@ -61,6 +61,7 @@ int vsync_frame_counter;
 #ifdef HAVE_NETWORK
 #include "monitor_network.h"
 #endif
+#include "prodbg_plugin.h"
 #include "network.h"
 #include "resources.h"
 #include "sound.h"
@@ -347,6 +348,7 @@ int vsync_do_vsync(struct video_canvas_s *c, int been_skipped)
     /* check if someone wants to connect remotely to the monitor */
     monitor_check_remote();
 #endif
+	prodbg_plugin_update();
 
     vsync_frame_counter++;
 

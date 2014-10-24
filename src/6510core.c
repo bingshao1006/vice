@@ -2029,6 +2029,12 @@ static const BYTE rewind_fetch_tab[] = {
                         reg_a_read, reg_x_read, reg_y_read, reg_sp, drv->mynumber + 8);
         }
 #else
+
+		if (prodbg_plugin_get_state() == PRODBG_STATE_TRACE)
+		{
+			prodbg_plugin_set_state(reg_pc, reg_a_read, reg_x_read, reg_y_read, reg_sp);
+		}
+
         if (TRACEFLG) {
             BYTE op = (BYTE)(p0);
             BYTE lo = (BYTE)(p1);

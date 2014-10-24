@@ -54,6 +54,8 @@ libmonitor_a_SOURCES = \
 	monitor.c \
 	monitor_network.c \
 	monitor_network.h \
-	montypes.h
+	montypes.h \ 
+	prodbg_plugin.c \
+	prodbg_plugin.h
 
 BUILT_SOURCES = mon_parse.c

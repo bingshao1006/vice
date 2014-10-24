@@ -62,7 +62,10 @@ am_libmonitor_a_OBJECTS = asm6502.$(OBJEXT) asm6502dtv.$(OBJEXT) \
 	mon_register6809.$(OBJEXT) mon_registerR65C02.$(OBJEXT) \
 	mon_registerz80.$(OBJEXT) mon_ui.$(OBJEXT) mon_util.$(OBJEXT) \
 	mon_lex.$(OBJEXT) mon_parse.$(OBJEXT) monitor.$(OBJEXT) \
-	monitor_network.$(OBJEXT)
+	log.$(OBJEXT) pd_binary_writer.$(OBJEXT) \
+	pd_binary_reader.$(OBJEXT) \
+	monitor_network.$(OBJEXT) prodbg_plugin.$(OBJEXT) \
+	remote_connection.$(OBJEXT) remote_api.$(OBJEXT)
 libmonitor_a_OBJECTS = $(am_libmonitor_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -375,7 +378,14 @@ libmonitor_a_SOURCES = \
 	monitor.c \
 	monitor_network.c \
 	monitor_network.h \
-	montypes.h
+	montypes.h \
+	pd_binary_writer.c \
+	pd_binary_reader.c \
+	prodbg_plugin.c \
+	prodbg_plugin.h \
+	remote_api.c \
+	remote_connection.c \
+	prodbg_plugin.h
 
 BUILT_SOURCES = mon_parse.c
 all: $(BUILT_SOURCES)
