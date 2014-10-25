@@ -23,7 +23,7 @@ void pda_log_level_pop();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define log_error(...) pda_log_out(LOG_ERROR,  __FILE__, __LINE__, __VA_ARGS__)
-#define log_debug(...) pda_log_out(LOG_DEBUG,  __FILE__, __LINE__, __VA_ARGS__)
-#define log_info(...)  pda_log_out(LOG_INFO,   __FILE__, __LINE__, __VA_ARGS__)
+#define pda_log_error(...) pda_log_out(LOG_ERROR,  __FILE__, __LINE__, __VA_ARGS__)
+#define pda_log_debug(...) pda_log_out(LOG_DEBUG,  __FILE__, __LINE__, __VA_ARGS__)
+#define pda_log_info(...)  pda_log_out(LOG_INFO,   __FILE__, __LINE__, __VA_ARGS__)
 
