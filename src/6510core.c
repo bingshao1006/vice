@@ -39,6 +39,7 @@
 #endif
 
 #include "traps.h"
+#include "monitor/prodbg_plugin.h"
 
 #ifndef C64DTV
 /* The C64DTV can use different shadow registers for accu read/write. */
@@ -2030,11 +2031,6 @@ static const BYTE rewind_fetch_tab[] = {
         }
 #else
 
-		if (prodbg_plugin_get_state() == PRODBG_STATE_TRACE)
-		{
-			prodbg_plugin_set_state(reg_pc, reg_a_read, reg_x_read, reg_y_read, reg_sp);
-		}
-
         if (TRACEFLG) {
             BYTE op = (BYTE)(p0);
             BYTE lo = (BYTE)(p1);
@@ -2057,6 +2053,26 @@ static const BYTE rewind_fetch_tab[] = {
         }
 #endif
 #endif
+		if (CALLER == e_comp_space)
+		{
+			if (prodbg_plugin_state() == PRODBG_STATE_TRACE)
+			{
+				const char* dis_string;
+
+				BYTE op = (BYTE)(p0);
+				BYTE lo = (BYTE)(p1);
+				BYTE hi = (BYTE)(p2 >> 8);
+
+				if (op == 0x20) {
+				hi = LOAD(reg_pc + 2);
+				}
+
+				dis_string = mon_disassemble_to_string(e_comp_space, reg_pc, op, lo, hi, 0, 1, "6502"),
+				printf("disa: %04x %02x-%02x-%02x - %s\n", reg_pc, op, lo, hi, dis_string); 
+
+				prodbg_plugin_set_state(reg_pc, reg_a_read, reg_x_read, reg_y_read, reg_sp);
+			}
+		}
 
 trap_skipped:
         SET_LAST_OPCODE(p0);
