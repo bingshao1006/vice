@@ -61,16 +61,16 @@ static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setRegisters(PDWriter* writer)
+static void setRegisters(Debugger6502* debugger, PDWriter* writer)
 {
     PDWrite_eventBegin(writer, PDEventType_setRegisters);
     PDWrite_arrayBegin(writer, "registers");
 
-    writeRegister(writer, "pc", 2, s_debugger.pc, 1);
-    writeRegister(writer, "sp", 1, s_debugger.sp, 0);
-    writeRegister(writer, "a", 1, s_debugger.a, 0);
-    writeRegister(writer, "x", 1, s_debugger.x, 0);
-    writeRegister(writer, "y", 1, s_debugger.y, 0);
+    writeRegister(writer, "pc", 2, debugger->pc, 1);
+    writeRegister(writer, "sp", 1, debugger->sp, 0);
+    writeRegister(writer, "a", 1, debugger->a, 0);
+    writeRegister(writer, "x", 1, debugger->x, 0);
+    writeRegister(writer, "y", 1, debugger->y, 0);
     //writeRegister(writer, "status", 1, status, 1);
 
     PDWrite_arrayEnd(writer);
@@ -79,10 +79,10 @@ static void setRegisters(PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setExceptionLocation(PDWriter* writer)
+static void setExceptionLocation(Debugger6502* debugger, PDWriter* writer)
 {
     PDWrite_eventBegin(writer,PDEventType_setExceptionLocation); 
-    PDWrite_u16(writer, "address", s_debugger.pc);
+    PDWrite_u16(writer, "address", debugger->pc);
     PDWrite_u8(writer, "address_size", 2);
     PDWrite_eventEnd(writer);
 }
@@ -101,14 +101,19 @@ int disassembleToBuffer(char* dest, int* addressIn, int* instCountIn)
     
     for (i = 0; i < instCount; ++i)
     {
+    	char tempBuffer[512];
     	unsigned int size;
 
 		const char* code = mon_dis(e_comp_space, address, &size);
-        len = (int)strlen(code);
 
-        strncpy(dest, code, len);
+        sprintf(tempBuffer, "%04X %s\n", address, code); 
+        printf("%s", tempBuffer);
+        len = (int)strlen(tempBuffer);
+
+        strncpy(dest, tempBuffer, len);
         dest += len;
 
+        address += size;
 		totalLength += len;
     }
 
@@ -152,11 +157,17 @@ static void getDisassembly(PDReader* reader, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void sendState(PDWriter* writer)
+static void sendState(Debugger6502* debugger, PDWriter* writer)
 {
-    setExceptionLocation(writer);
-    setRegisters(writer);
-	setDisassembly(writer, 0, 10);
+	int pc = debugger->pc;
+
+    setExceptionLocation(debugger, writer);
+    setRegisters(debugger, writer);
+
+	//pc = debugger->pc - 10;
+	//if (pc < 0) pc = 0;
+
+	setDisassembly(writer, pc, 10);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -171,16 +182,16 @@ static void doAction(Debugger6502* debugger, PDAction action, PDWriter* writer)
         {
             // On this target we can anways break so just set that we have stopped on breakpoint
             
-            printf("Fake6502Debugger: break\n");
+            printf("VICE-ProDBG: break\n");
             debugger->state = PDDebugState_stopException;
-            sendState(writer);
+            sendState(debugger, writer);
             break;
         }
 
         case PDAction_run : 
         {
             // on this target we can always start running directly again
-            printf("Fake6502Debugger: run\n");
+            printf("VICE-ProDBG: run\n");
             debugger->state = PDDebugState_running;
             break;
         }
@@ -188,9 +199,9 @@ static void doAction(Debugger6502* debugger, PDAction action, PDWriter* writer)
         case PDAction_step : 
         {
             // on this target we can always stepp 
-            printf("Fake6502Debugger: step\n");
+            printf("VICE-ProDBG: step\n");
             debugger->state = PDDebugState_trace;
-            sendState(writer);
+            sendState(debugger, writer);
             break;
         }
     }
@@ -283,6 +294,12 @@ void prodbg_plugin_set_state(int pc, int a, int x, int y, int sp)
 			}
 
 			default : break;
+		}
+
+		if (!PDRemote_isConnected())
+		{
+			debugger->state = PDDebugState_running;
+			return;
 		}
 
 		PDRemote_update(1);

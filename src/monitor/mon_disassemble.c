@@ -94,6 +94,8 @@ static const char *mon_disassemble_to_string_internal(MEMSPACE memspace,
 #define p3      opc[3]
 #define p4      opc[4]
 
+	printf("%04x - %02x %02x %02x %02x\n", addr, x, p1, p2, p3);
+
     ival = (WORD)(p1 & 0xff);
 
     buffp = buff;
@@ -1432,7 +1434,7 @@ void mon_disassemble_lines(MON_ADDR start_addr, MON_ADDR end_addr)
     len = mon_evaluate_address_range(&start_addr, &end_addr, FALSE, DEFAULT_DISASSEMBLY_SIZE);
 
     if (len < 0) {
-        log_error(LOG_ERR, "Invalid address range");
+        log_error(LOG_ERROR, "Invalid address range");
         return;
     }
 
@@ -1450,12 +1452,15 @@ void mon_disassemble_lines(MON_ADDR start_addr, MON_ADDR end_addr)
     }
 }
 
+
 const char* mon_dis(MEMSPACE mem, WORD loc, unsigned int *size)
 {
     const BYTE op = mon_get_mem_val(mem, loc);
     const BYTE p1 = mon_get_mem_val(mem, loc + 1);
     const BYTE p2 = mon_get_mem_val(mem, loc + 2);
 
-    return mon_disassemble_to_string_ex(mem, loc, loc, op, p1, p2, 1, size);
+    printf("mdis: %04x %02x-%02x-%02x\n", loc, op, p1, p2);
+
+    return mon_disassemble_to_string_ex(mem, loc, op, p1, p2, 0, 1, size);
 }
 

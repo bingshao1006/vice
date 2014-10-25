@@ -560,7 +560,9 @@ BYTE mon_get_mem_val_ex(MEMSPACE mem, int bank, WORD mem_addr)
 
 BYTE mon_get_mem_val(MEMSPACE mem, WORD mem_addr)
 {
-    return mon_get_mem_val_ex(mem, mon_interfaces[mem]->current_bank, mem_addr);
+	BYTE v = mon_get_mem_val_ex(mem, mon_interfaces[mem]->current_bank, mem_addr);
+	printf("mem: %04x - %02x\n", mem_addr, v);
+	return v;
 }
 
 void mon_get_mem_block_ex(MEMSPACE mem, int bank, WORD start, WORD end, BYTE *data)
