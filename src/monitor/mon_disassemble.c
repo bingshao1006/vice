@@ -1459,8 +1459,6 @@ const char* mon_dis(MEMSPACE mem, WORD loc, unsigned int *size)
     const BYTE p1 = mon_get_mem_val(mem, loc + 1);
     const BYTE p2 = mon_get_mem_val(mem, loc + 2);
 
-    printf("mdis: %04x %02x-%02x-%02x\n", loc, op, p1, p2);
-
     return mon_disassemble_to_string_ex(mem, loc, op, p1, p2, 0, 1, size);
 }
 
