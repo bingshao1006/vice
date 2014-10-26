@@ -89,6 +89,39 @@ static void setExceptionLocation(Debugger6502* debugger, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static void setMemory(Debugger6502* debugger, PDWriter* writer, uint16_t address, uint16_t size)
+{
+	unsigned char* data;
+	unsigned char* tempData;
+	int i;
+
+	/*
+	if (PDRead_findU16(reader, &address, "address", 0) == PDReadStatus_notFound)
+		return;
+
+	if (PDRead_findU16(reader, &size, "size", 0) == PDReadStatus_notFound)
+		return;
+	*/
+
+	tempData = data = (unsigned char*)malloc(size);
+
+	for (i = 0; i < size; ++i)
+	{
+		*tempData++ = mon_get_mem_val(e_comp_space, address + i);
+	}
+
+	printf("VICE-ProDBG: sending memory");
+
+	PDWrite_eventBegin(writer, PDEventType_setMemory);
+	PDWrite_u8(writer, "dummy_memory", 0);
+	PDWrite_data(writer, "data", data, size); 
+	PDWrite_eventEnd(writer);
+
+	free(data);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int disassembleToBuffer(char* dest, int* addressIn, int* instCountIn)
 {
     int i;
@@ -164,10 +197,11 @@ static void sendState(Debugger6502* debugger, PDWriter* writer)
     setExceptionLocation(debugger, writer);
     setRegisters(debugger, writer);
 
-	//pc = debugger->pc - 10;
-	//if (pc < 0) pc = 0;
+	pc = debugger->pc - 40;
+	if (pc < 0) pc = 0;
 
-	setDisassembly(writer, pc, 10);
+	setDisassembly(writer, pc, 40);
+	setMemory(debugger, writer, pc, 1024);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,13 +246,24 @@ static void doAction(Debugger6502* debugger, PDAction action, PDWriter* writer)
 
 static PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer)
 {
-    //int event = 0;
-
-    (void)reader;
+	uint32_t event;
 
     Debugger6502* debugger = (Debugger6502*)userData;
 
     doAction(debugger, action, writer);
+
+    while ((event = PDRead_getEvent(reader)) != 0)
+    {
+        switch (event)
+        {
+            case PDEventType_setMemory:
+            {
+            	printf("VICE-ProDBG: requesting memory");
+				//setMemory(debugger, reader, writer);
+                break;
+            }
+        }
+    }
 
     return debugger->state;
 }
